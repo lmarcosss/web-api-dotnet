@@ -13,15 +13,20 @@ namespace WebApi.Repositories
             _context = context;
         }
 
-        void IEmployeeRepository.Add(Employee employee)
+        public void Add(Employee employee)
         {
             _context.Employees.Add(employee);
             _context.SaveChanges();
         }
 
-        List<Employee> IEmployeeRepository.GetAll()
+        public List<Employee> GetAll()
         {
             return _context.Employees.ToList();
+        }
+
+        public Employee? GetById(int id)
+        {
+            return _context.Employees.Find(id);
         }
     }
 }

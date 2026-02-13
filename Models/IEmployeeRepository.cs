@@ -6,5 +6,7 @@ namespace WebApi.Models
 
         List<Employee> GetAll();
 
+        Employee? GetById(int id);
+
     }
 }
