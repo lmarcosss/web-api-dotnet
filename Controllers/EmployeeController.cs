@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Models;
 using WebApi.ViewModel;
@@ -6,6 +7,7 @@ namespace WebApi.Controllers
 {
     [ApiController]
     [Route("api/v1/employee")]
+    [Authorize]
     public class EmployeeController : ControllerBase
     {
         private readonly IEmployeeRepository _employeeRepository;
