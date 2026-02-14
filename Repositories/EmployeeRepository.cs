@@ -19,9 +19,12 @@ namespace WebApi.Repositories
             _context.SaveChanges();
         }
 
-        public List<Employee> GetAll()
+        public List<Employee> GetAll(int pageNumber, int pageQuantity)
         {
-            return _context.Employees.ToList();
+            return _context.Employees
+                .Skip(pageNumber * pageQuantity)
+                .Take(pageQuantity)
+                .ToList();
         }
 
         public Employee? GetById(int id)

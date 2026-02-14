@@ -7,24 +7,31 @@ namespace WebApi.Controllers
 {
     [ApiController]
     [Route("api/v1/employee")]
-    [Authorize]
     public class EmployeeController : ControllerBase
     {
         private readonly IEmployeeRepository _employeeRepository;
+        private readonly ILogger<EmployeeController> _logger;
 
-        public EmployeeController(IEmployeeRepository employeeRepository)
+        public EmployeeController(IEmployeeRepository employeeRepository, ILogger<EmployeeController> logger)
         {
             _employeeRepository = employeeRepository;
+            _logger = logger;
         }
 
 
         [HttpPost]
         public IActionResult Add([FromForm] EmployeeViewModel employeeView)
         {
-            var filePath = Path.Combine("Storage", employeeView.Photo.FileName);
+            string? filePath = null;
 
-            using Stream fileStream = new FileStream(filePath, FileMode.Create);
-            employeeView.Photo.CopyTo(fileStream);
+            if (employeeView.Photo != null && !string.IsNullOrEmpty(employeeView.Photo.FileName))
+            {
+                filePath = Path.Combine("Storage", employeeView.Photo.FileName);
+
+                using Stream fileStream = new FileStream(filePath, FileMode.Create);
+                employeeView.Photo.CopyTo(fileStream);
+
+            }
 
             var employee = new Employee(employeeView.Name, employeeView.Age, filePath);
 
@@ -34,9 +41,13 @@ namespace WebApi.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAll()
+        public IActionResult GetAll(int pageNumber, int pageQuantity)
         {
-            var employees = _employeeRepository.GetAll();
+            _logger.LogInformation("Teste");
+
+            throw new Exception("Erro de teste");
+
+            var employees = _employeeRepository.GetAll(pageNumber, pageQuantity);
 
             return Ok(employees);
         }
