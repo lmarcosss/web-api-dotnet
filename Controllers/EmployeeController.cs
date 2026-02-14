@@ -1,7 +1,6 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using WebApi.Models;
-using WebApi.ViewModel;
+using WebApi.Domain.Models;
+using WebApi.Application.ViewModel;
 
 namespace WebApi.Controllers
 {

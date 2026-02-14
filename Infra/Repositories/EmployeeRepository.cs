@@ -1,8 +1,7 @@
 
-using WebApi.Models;
-using WebApi.Infra;
+using WebApi.Domain.Models;
 
-namespace WebApi.Repositories
+namespace WebApi.Infra.Repositories
 {
     public class EmployeeRepository : IEmployeeRepository
     {
