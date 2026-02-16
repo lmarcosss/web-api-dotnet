@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Application.Services;
 using WebApi.Domain.Models;
@@ -5,7 +6,8 @@ using WebApi.Domain.Models;
 namespace WebApi.Controllers
 {
     [ApiController]
-    [Route("api/v1/auth")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     public class AuthController : ControllerBase
     {
         [HttpPost]

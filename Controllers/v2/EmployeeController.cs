@@ -3,11 +3,13 @@ using WebApi.Domain.Models;
 using WebApi.Application.ViewModel;
 using AutoMapper;
 using WebApi.Domain.DTOs;
+using Asp.Versioning;
 
 namespace WebApi.Controllers.v2
 {
+    [ApiVersion("2.0")]
     [ApiController]
-    [Route("api/v2/employee")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     public class EmployeeController : ControllerBase
     {
         private readonly IEmployeeRepository _employeeRepository;

@@ -8,7 +8,8 @@ using Microsoft.OpenApi;
 using WebApi.Domain.Models;
 using WebApi.Infra.Repositories;
 using WebApi.Application.Mapping;
-using Microsoft.AspNetCore.Mvc;
+using Asp.Versioning;
+using Asp.Versioning.ApiExplorer;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +18,13 @@ builder.Services.AddControllers();
 builder.Services.AddAutoMapper(typeof(DomainToDTOMapping));
 
 builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddApiVersioning(options =>
+{
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ReportApiVersions = true;
+});
 
 builder.Services.AddSwaggerGen(options =>
 {
@@ -57,6 +65,21 @@ builder.Services.AddAuthentication(x =>
     };
 });
 
+builder.Services.AddApiVersioning(options =>
+    {
+        options.DefaultApiVersion = new ApiVersion(1, 0);
+        options.AssumeDefaultVersionWhenUnspecified = true;
+        options.ReportApiVersions = true;
+    })
+    .AddMvc()
+    .AddApiExplorer(options =>
+    {
+        options.GroupNameFormat = "'v'VVV";
+        options.SubstituteApiVersionInUrl = true;
+    });
+
+builder.Services.AddSwaggerGen();
+builder.Services.ConfigureOptions<ConfigureSwaggerOptions>();
 builder.Services.AddDbContext<ConnectionContext>(options =>
     options.UseNpgsql(
         builder.Configuration.GetConnectionString("DefaultConnection")
@@ -67,8 +90,19 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/error");
+
+    var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
+
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options =>
+    {
+        foreach (var description in provider.ApiVersionDescriptions)
+        {
+            options.SwaggerEndpoint(
+                $"/swagger/{description.GroupName}/swagger.json",
+                $"Web Api - {description.GroupName.ToUpperInvariant()}");
+        }
+    });
 
 }
 else
@@ -76,7 +110,7 @@ else
     app.UseExceptionHandler("/error");
 }
 
-// app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
