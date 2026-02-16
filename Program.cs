@@ -7,11 +7,17 @@ using WebApi;
 using Microsoft.OpenApi;
 using WebApi.Domain.Models;
 using WebApi.Infra.Repositories;
+using WebApi.Application.Mapping;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+
+builder.Services.AddAutoMapper(typeof(DomainToDTOMapping));
+
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen(options =>
 {
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme

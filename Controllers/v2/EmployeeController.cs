@@ -1,20 +1,25 @@
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Domain.Models;
 using WebApi.Application.ViewModel;
+using AutoMapper;
+using WebApi.Domain.DTOs;
 
-namespace WebApi.Controllers
+namespace WebApi.Controllers.v2
 {
     [ApiController]
-    [Route("api/v1/employee")]
+    [Route("api/v2/employee")]
     public class EmployeeController : ControllerBase
     {
         private readonly IEmployeeRepository _employeeRepository;
         private readonly ILogger<EmployeeController> _logger;
 
-        public EmployeeController(IEmployeeRepository employeeRepository, ILogger<EmployeeController> logger)
+        private readonly IMapper _mapper;
+
+        public EmployeeController(IEmployeeRepository employeeRepository, ILogger<EmployeeController> logger, IMapper mapper)
         {
             _employeeRepository = employeeRepository;
             _logger = logger;
+            _mapper = mapper;
         }
 
 
@@ -42,10 +47,6 @@ namespace WebApi.Controllers
         [HttpGet]
         public IActionResult GetAll(int pageNumber, int pageQuantity)
         {
-            _logger.LogInformation("Teste");
-
-            throw new Exception("Erro de teste");
-
             var employees = _employeeRepository.GetAll(pageNumber, pageQuantity);
 
             return Ok(employees);
@@ -56,7 +57,9 @@ namespace WebApi.Controllers
         {
             var employeee = _employeeRepository.GetById(id);
 
-            return Ok(employeee);
+            var employeesDTOS = _mapper.Map<EmployeeDTO>(employeee);
+
+            return Ok(employeesDTOS);
         }
 
         [HttpPost("{id}/download")]
