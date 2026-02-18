@@ -47,7 +47,7 @@ O projeto segue uma arquitetura em camadas, separando responsabilidades:
 ```
 WebApi/
 ├── Domain/              # Camada de Domínio
-│   ├── Models/          # Entidades (Employee, Company)
+│   ├── Models/          # Entidades (Employee)
 │   ├── DTOs/            # Data Transfer Objects
 │   └── Interfaces/      # Contratos de repositórios
 ├── Application/         # Camada de Aplicação
@@ -131,7 +131,7 @@ dotnet restore
 dotnet ef database update
 ```
 
-Isso criará as tabelas `employee` e `company` no banco de dados.
+Isso criará as tabelas no banco de dados.
 
 ### Passo 5: Executar a aplicação
 
@@ -263,15 +263,6 @@ A string de conexão está configurada em `appsettings.Development.json`:
     "name": "João Silva",       // string (obrigatório)
     "age": 30,                  // int
     "photo": "Storage/foto.jpg" // string (nullable)
-}
-```
-
-### Company (Empresa)
-
-```csharp
-{
-    "id": 1,              // int (Primary Key)
-    "name": "Acme Corp"   // string (obrigatório)
 }
 ```
 
