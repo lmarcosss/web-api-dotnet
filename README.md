@@ -38,6 +38,8 @@ O objetivo principal é consolidar conhecimentos em:
 - **API Versioning** - Gerenciamento de versões da API
   - `Asp.Versioning.Mvc 7.1.1`
   - `Asp.Versioning.Mvc.ApiExplorer 7.1.0`
+- **AWS SDK S3** (`AWSSDK.S3` 4.0.18.6) - Armazenamento de arquivos em nuvem
+- **BCrypt.Net-Next** (4.0.3) - Hash de senhas
 - **Docker Compose** - Orquestração de containers
 
 ## Arquitetura e Padrões
@@ -51,22 +53,24 @@ WebApi/
 │   ├── DTOs/            # Data Transfer Objects
 │   └── Interfaces/      # Contratos de repositórios
 ├── Application/         # Camada de Aplicação
-│   ├── Services/        # Serviços (TokenService)
-│   ├── ViewModels/      # Modelos de entrada
+│   ├── Services/        # UserService, TokenService, S3FileStorageService
+│   ├── Services/Interfaces/  # IUserService, ITokenService, IFileStorageService
+│   ├── ViewModel/        # Modelos de entrada
 │   ├── Mapping/         # Configuração do AutoMapper
 │   └── Swagger/         # Configuração do Swagger
 ├── Infra/              # Camada de Infraestrutura
 │   ├── Repositories/    # Implementação dos repositórios
 │   └── ConnectionContext.cs  # Contexto do Entity Framework
+├── Settings/            # Configurações (JwtSettings via appsettings)
 ├── Controllers/         # Controladores da API
 │   └── v1/             # Versão 1
-├── Migrations/          # Migrações do EF Core
-└── Storage/             # Armazenamento local de arquivos
+└── Migrations/          # Migrações do EF Core
 ```
 
 ### Padrões Implementados
 
 - **Repository Pattern** - Abstração da camada de acesso a dados
+- **Application Services** - Orquestração entre repositório, storage e mapeamento (UserService, TokenService)
 - **Dependency Injection** - Inversão de controle e injeção de dependências
 - **DTO Pattern** - Separação entre modelos de domínio e transferência de dados
 - **Separation of Concerns** - Separação clara entre camadas
@@ -76,8 +80,8 @@ WebApi/
 
 - ✅ CRUD completo de usuários (User)
 - ✅ Autenticação JWT com token bearer (email e senha)
-- ✅ Upload de fotos de usuários
-- ✅ Download de fotos armazenadas
+- ✅ Upload de fotos de usuários para AWS S3 (URL retornada no objeto do usuário)
+- ✅ URL da foto (S3) retornada no recurso do usuário para exibição/download pelo cliente
 - ✅ Paginação de resultados
 - ✅ Versionamento de API (v1)
 - ✅ Documentação Swagger com autenticação Bearer
@@ -159,7 +163,6 @@ O Swagger permite testar todos os endpoints diretamente pelo navegador, incluind
 | POST | `/api/v1/user` | Criar novo usuário | Sim |
 | GET | `/api/v1/user` | Listar usuários (com paginação) | Sim |
 | GET | `/api/v1/user/{id}` | Buscar usuário por ID | Sim |
-| POST | `/api/v1/user/{id}/download` | Download da foto do usuário | Sim |
 
 > **Nota**: A API utiliza apenas a versão **v1** (`/api/v1/...`).
 
@@ -245,14 +248,28 @@ A string de conexão está configurada em `appsettings.Development.json`:
 }
 ```
 
-### JWT Secret Key
+### JWT (JwtSettings)
 
-⚠️ **IMPORTANTE**: O secret key está hardcoded no arquivo `Key.cs` apenas para fins de estudo. 
+O JWT é configurado em **appsettings** (seção `JwtSettings` com chave `ApiSecret`). Em desenvolvimento, use **User Secrets** ou variáveis de ambiente para não commitar valores reais. Em produção, utilize Azure Key Vault, AWS Secrets Manager ou similar e nunca commite secrets no repositório.
 
-**Em ambiente de produção, você deve:**
-- Usar variáveis de ambiente
-- Utilizar Azure Key Vault, AWS Secrets Manager ou similar
-- Nunca commitar secrets no repositório
+### Configuração AWS S3 (Cloud)
+
+As credenciais e o bucket de armazenamento de fotos são configurados na seção `Cloud` do appsettings:
+
+```json
+"JwtSettings": { "ApiSecret": "..." },
+"Cloud": {
+  "FileStorageBucketName": "...",
+  "AccessKeyId": "...",
+  "SecretAccessKey": "..."
+}
+```
+
+- **FileStorageBucketName**: nome do bucket S3 onde as fotos são enviadas
+- **AccessKeyId** e **SecretAccessKey**: credenciais AWS (recomenda-se IAM com permissões mínimas para o bucket)
+- A região está fixa no código como `USEast1`; em produção considere externalizar (ex.: configuração ou variável de ambiente)
+
+⚠️ **Segurança**: Não commite credenciais reais. Use variáveis de ambiente ou IAM roles (ex.: em EC2/ECS) em produção.
 
 ## Modelos de Dados
 
@@ -265,7 +282,7 @@ A senha não é exposta na API (armazenada como hash no banco).
     "id": 1,                        // int (Primary Key)
     "name": "João Silva",           // string (obrigatório)
     "dateOfBirth": "1990-05-15",    // DateTime
-    "photo": "Storage/foto.jpg",    // string (nullable)
+    "photo": "https://bucket.s3.region.amazonaws.com/profileImage-...",  // string (nullable) - URL da imagem no S3
     "email": "joao@email.com"       // string (obrigatório, único)
 }
 ```
@@ -284,7 +301,8 @@ Este projeto aborda os seguintes conceitos importantes:
 - **Versionamento de APIs** para manter compatibilidade
 - **Documentação com Swagger/OpenAPI**
 - **Containerização** de serviços com Docker
-- **Upload e download de arquivos** em APIs
+- **Upload de arquivos e armazenamento em nuvem (AWS S3)**
+- **Configuração sensível** via appsettings/ambiente (JWT, credenciais AWS)
 - **Paginação** para otimização de consultas
 - **Arquitetura em camadas** (Domain, Application, Infrastructure)
 - **Separation of Concerns** (SoC)
@@ -331,7 +349,8 @@ Sugestões para expandir este projeto de estudo:
 - [ ] Implementar soft delete
 - [ ] Adicionar filtros e ordenação
 - [ ] Implementar busca avançada
-- [ ] Migrar storage para Azure Blob Storage ou AWS S3
+- [ ] Tornar região S3 configurável (appsettings ou variável de ambiente)
+- [ ] Suportar múltiplos provedores de storage (interface/estratégia)
 
 ## Comandos Úteis
 
@@ -409,10 +428,11 @@ docker exec -it postgres-db psql -U postgres -d app_db
 - Documentação separada por versão da API
 - Disponível apenas em ambiente de desenvolvimento
 
-### Storage de Arquivos
-- Fotos são salvas localmente na pasta `Storage/`
-- Em produção, recomenda-se usar serviços de blob storage (Azure Blob, AWS S3, MinIO)
-- Não há validação de tipo de arquivo (adicionar para produção)
+### Storage de Arquivos (AWS S3)
+- Fotos enviadas no cadastro são enviadas ao bucket configurado em `Cloud:FileStorageBucketName`
+- O nome do arquivo segue o padrão do código (ex.: `profileImage-{email}-{name}`)
+- A URL retornada é construída pelo `S3FileStorageService` no formato `https://{bucket}.s3.{region}.amazonaws.com/{key}` e armazenada no campo `photo` do usuário
+- O cliente pode exibir ou baixar a imagem diretamente pela URL retornada
 
 ### CORS
 - CORS não está configurado atualmente
