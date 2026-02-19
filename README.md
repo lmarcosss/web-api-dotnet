@@ -10,7 +10,7 @@ Projeto de estudo de Web API com ASP.NET Core 10.0, implementando autenticação
 
 ## Sobre o Projeto
 
-Este é um projeto de estudo focado em aprender e praticar os principais conceitos de desenvolvimento de APIs RESTful com ASP.NET Core. O projeto simula um sistema de gerenciamento de funcionários com funcionalidades de CRUD, autenticação JWT, upload de arquivos e versionamento de API.
+Este é um projeto de estudo focado em aprender e praticar os principais conceitos de desenvolvimento de APIs RESTful com ASP.NET Core. O projeto simula um sistema de gerenciamento de usuários com funcionalidades de CRUD, autenticação JWT (email e senha), upload de arquivos e versionamento de API.
 
 ### Objetivo Educacional
 
@@ -47,7 +47,7 @@ O projeto segue uma arquitetura em camadas, separando responsabilidades:
 ```
 WebApi/
 ├── Domain/              # Camada de Domínio
-│   ├── Models/          # Entidades (Employee)
+│   ├── Models/          # Entidades (User)
 │   ├── DTOs/            # Data Transfer Objects
 │   └── Interfaces/      # Contratos de repositórios
 ├── Application/         # Camada de Aplicação
@@ -59,8 +59,7 @@ WebApi/
 │   ├── Repositories/    # Implementação dos repositórios
 │   └── ConnectionContext.cs  # Contexto do Entity Framework
 ├── Controllers/         # Controladores da API
-│   ├── v1/             # Versão 1 (deprecated)
-│   └── v2/             # Versão 2 (atual)
+│   └── v1/             # Versão 1
 ├── Migrations/          # Migrações do EF Core
 └── Storage/             # Armazenamento local de arquivos
 ```
@@ -71,16 +70,16 @@ WebApi/
 - **Dependency Injection** - Inversão de controle e injeção de dependências
 - **DTO Pattern** - Separação entre modelos de domínio e transferência de dados
 - **Separation of Concerns** - Separação clara entre camadas
-- **API Versioning** - Controle de versões da API (v1 deprecated, v2 ativa)
+- **API Versioning** - Controle de versões da API (v1)
 
 ## Funcionalidades Implementadas
 
-- ✅ CRUD completo de funcionários (Employee)
-- ✅ Autenticação JWT com token bearer
-- ✅ Upload de fotos de funcionários
+- ✅ CRUD completo de usuários (User)
+- ✅ Autenticação JWT com token bearer (email e senha)
+- ✅ Upload de fotos de usuários
 - ✅ Download de fotos armazenadas
 - ✅ Paginação de resultados
-- ✅ Versionamento de API (v1 e v2)
+- ✅ Versionamento de API (v1)
 - ✅ Documentação Swagger com autenticação Bearer
 - ✅ Health Check endpoint
 - ✅ Tratamento de erros global
@@ -156,13 +155,13 @@ O Swagger permite testar todos os endpoints diretamente pelo navegador, incluind
 | Método | Endpoint | Descrição | Autenticação |
 |--------|----------|-----------|--------------|
 | GET | `/` | Health check | Não |
-| POST | `/api/v1/auth` | Autenticação (obter token JWT) | Não |
-| POST | `/api/v{version}/employee` | Criar novo funcionário | Sim |
-| GET | `/api/v{version}/employee` | Listar funcionários (com paginação) | Sim |
-| GET | `/api/v{version}/employee/{id}` | Buscar funcionário por ID | Sim |
-| POST | `/api/v{version}/employee/{id}/download` | Download da foto do funcionário | Sim |
+| POST | `/api/v1/auth` | Autenticação (obter token JWT com email e senha) | Não |
+| POST | `/api/v1/user` | Criar novo usuário | Sim |
+| GET | `/api/v1/user` | Listar usuários (com paginação) | Sim |
+| GET | `/api/v1/user/{id}` | Buscar usuário por ID | Sim |
+| POST | `/api/v1/user/{id}/download` | Download da foto do usuário | Sim |
 
-> **Nota**: `{version}` pode ser `v1` ou `v2`. Recomenda-se usar `v2` pois `v1` está marcada como deprecated.
+> **Nota**: A API utiliza apenas a versão **v1** (`/api/v1/...`).
 
 ### Autenticação
 
@@ -170,16 +169,16 @@ O projeto utiliza autenticação JWT (JSON Web Token). Para acessar endpoints pr
 
 #### Credenciais de Teste
 
-- **Usuário**: `leonardo`
-- **Senha**: `123456`
+Cadastre um usuário via `POST /api/v1/user` (com email, senha, nome, data de nascimento e opcionalmente foto) e use o mesmo **email** e **senha** para obter o token.
+
 - **Validade do Token**: 3 horas
 
 #### Exemplo de Autenticação
 
-**1. Obter o token:**
+**1. Obter o token (email e senha):**
 
 ```bash
-curl -X POST "https://localhost:7198/api/v1/auth?username=leonardo&password=123456"
+curl -X POST "https://localhost:7198/api/v1/auth?email=seu@email.com&password=suasenha"
 ```
 
 **Resposta:**
@@ -193,7 +192,7 @@ curl -X POST "https://localhost:7198/api/v1/auth?username=leonardo&password=1234
 
 ```bash
 curl -H "Authorization: Bearer {seu-token-aqui}" \
-     "https://localhost:7198/api/v2/employee?pageNumber=1&pageQuantity=10"
+     "https://localhost:7198/api/v1/user?pageNumber=1&pageQuantity=10"
 ```
 
 #### Autenticação no Swagger
@@ -205,28 +204,30 @@ curl -H "Authorization: Bearer {seu-token-aqui}" \
 
 ### Exemplos de Requisições
 
-#### Criar Funcionário
+#### Criar Usuário
 
 ```bash
-curl -X POST "https://localhost:7198/api/v2/employee" \
+curl -X POST "https://localhost:7198/api/v1/user" \
   -H "Authorization: Bearer {token}" \
   -H "Content-Type: multipart/form-data" \
   -F "Name=João Silva" \
-  -F "Age=30" \
+  -F "DateOfBirth=1990-05-15" \
+  -F "Email=joao@email.com" \
+  -F "Password=suasenha123" \
   -F "Photo=@/caminho/para/foto.jpg"
 ```
 
-#### Listar Funcionários
+#### Listar Usuários
 
 ```bash
-curl -X GET "https://localhost:7198/api/v2/employee?pageNumber=1&pageQuantity=10" \
+curl -X GET "https://localhost:7198/api/v1/user?pageNumber=1&pageQuantity=10" \
   -H "Authorization: Bearer {token}"
 ```
 
 #### Buscar por ID
 
 ```bash
-curl -X GET "https://localhost:7198/api/v2/employee/1" \
+curl -X GET "https://localhost:7198/api/v1/user/1" \
   -H "Authorization: Bearer {token}"
 ```
 
@@ -255,14 +256,17 @@ A string de conexão está configurada em `appsettings.Development.json`:
 
 ## Modelos de Dados
 
-### Employee (Funcionário)
+### User (Usuário)
+
+A senha não é exposta na API (armazenada como hash no banco).
 
 ```csharp
 {
-    "id": 1,                    // int (Primary Key)
-    "name": "João Silva",       // string (obrigatório)
-    "age": 30,                  // int
-    "photo": "Storage/foto.jpg" // string (nullable)
+    "id": 1,                        // int (Primary Key)
+    "name": "João Silva",           // string (obrigatório)
+    "dateOfBirth": "1990-05-15",    // DateTime
+    "photo": "Storage/foto.jpg",    // string (nullable)
+    "email": "joao@email.com"       // string (obrigatório, único)
 }
 ```
 
@@ -397,9 +401,8 @@ docker exec -it postgres-db psql -U postgres -d app_db
 ## Observações Técnicas
 
 ### API Versioning
-- **v1** está marcada como `Deprecated = true`
-- **v2** é a versão atual e recomendada
-- O versionamento é feito via URL: `/api/v1/...` e `/api/v2/...`
+- Apenas a versão **v1** está em uso
+- O versionamento é feito via URL: `/api/v1/...`
 
 ### Swagger
 - Configurado com suporte a autenticação Bearer token
