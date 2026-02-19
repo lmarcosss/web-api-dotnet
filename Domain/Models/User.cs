@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace WebApi.Domain.Models
 {
@@ -12,9 +13,9 @@ namespace WebApi.Domain.Models
         public DateTime dateOfBirth { get; private set; }
         public string? photo { get; private set; }
         public string email { get; private set; }
-        public string password { get; private set; }
 
-        public User() { }
+        [JsonIgnore]
+        public string password { get; private set; }
 
         public User(string name, DateTime dateOfBirth, string? photo, string email, string password)
         {

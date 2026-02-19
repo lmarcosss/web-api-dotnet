@@ -4,6 +4,8 @@ using WebApi.Application.ViewModel;
 using AutoMapper;
 using WebApi.Domain.DTOs;
 using Asp.Versioning;
+using WebApi.Application.Services;
+using WebApi.Application.Services.Interfaces;
 
 namespace WebApi.Controllers.v1
 {
@@ -12,39 +14,25 @@ namespace WebApi.Controllers.v1
     [Route("api/v{version:apiVersion}/[controller]")]
     public class UserController : ControllerBase
     {
-        private readonly IUserRepository _userRepository;
-        private readonly IMapper _mapper;
+        private readonly IUserService _userService;
 
-        public UserController(IUserRepository userRepository, ILogger<UserController> logger, IMapper mapper)
+        public UserController(IUserService userService)
         {
-            _userRepository = userRepository;
-            _mapper = mapper;
+            _userService = userService;
         }
 
         [HttpPost]
         public IActionResult Add([FromForm] UserViewModel userView)
         {
-            string? filePath = null;
-
-            if (userView.Photo != null && !string.IsNullOrEmpty(userView.Photo.FileName))
-            {
-                filePath = Path.Combine("Storage", userView.Photo.FileName);
-
-                using Stream fileStream = new FileStream(filePath, FileMode.Create);
-                userView.Photo.CopyTo(fileStream);
-            }
-
-            var user = new User(userView.Name, userView.DateOfBirth, filePath, userView.Email, userView.Password);
-
-            _userRepository.Add(user);
+            _userService.Add(userView);
 
             return Ok();
         }
 
         [HttpGet]
-        public IActionResult GetAll(int pageNumber, int pageQuantity)
+        public IActionResult GetAll(int pageNumber = 0, int pageQuantity = 5)
         {
-            var users = _userRepository.GetAll(pageNumber, pageQuantity);
+            var users = _userService.GetAll(pageNumber, pageQuantity);
 
             return Ok(users);
         }
@@ -52,35 +40,21 @@ namespace WebApi.Controllers.v1
         [HttpGet("{id}")]
         public IActionResult GetById(int id)
         {
-            var user = _userRepository.GetById(id);
+            var user = _userService.GetById(id);
 
-            if (user == null)
-                return NotFound();
+            if (user == null) return NotFound();
 
-            var userDTO = _mapper.Map<UserDTO>(user);
-
-            return Ok(userDTO);
+            return Ok(user);
         }
 
         [HttpPost("{id}/download")]
         public IActionResult DownloadUserPhotoById(int id)
         {
-            var user = _userRepository.GetById(id);
+            var photoBytes = _userService.DownloadPhoto(id);
 
-            if (user == null)
-            {
-                return NotFound();
-            }
+            if (photoBytes == null) return NotFound("User photo not found.");
 
-            if (string.IsNullOrEmpty(user.photo))
-                return NotFound("User does not have a photo.");
-
-            if (!System.IO.File.Exists(user.photo))
-                return NotFound("Photo file not found.");
-
-            var dataBytes = System.IO.File.ReadAllBytes(user.photo);
-
-            return File(dataBytes, "image/jpeg");
+            return File(photoBytes, "image/jpeg");
         }
     }
 }

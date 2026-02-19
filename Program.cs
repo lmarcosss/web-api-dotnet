@@ -5,11 +5,13 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using WebApi;
 using Microsoft.OpenApi;
-using WebApi.Domain.Models;
 using WebApi.Infra.Repositories;
 using WebApi.Application.Mapping;
 using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
+using WebApi.Application.Services;
+using WebApi.Application.Services.Interfaces;
+using WebApi.Infra.Repositories.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,6 +47,7 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 builder.Services.AddTransient<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 var key = Encoding.ASCII.GetBytes(Key.Secret);
 
@@ -89,7 +92,7 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/error");
+    app.UseExceptionHandler("/error-development");
 
     var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
 

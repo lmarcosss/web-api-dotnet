@@ -1,11 +1,11 @@
-using WebApi.Domain.DTOs;
+using WebApi.Domain.Models;
 
-namespace WebApi.Domain.Models
+namespace WebApi.Infra.Repositories.Interfaces
 {
     public interface IUserRepository
     {
         void Add(User user);
-        List<UserDTO> GetAll(int pageNumber, int pageQuantity);
+        List<User> GetAll(int pageNumber, int pageQuantity);
         User? GetById(int id);
         User? GetByEmail(string email);
     }

@@ -1,7 +1,7 @@
 using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Application.Services;
-using WebApi.Domain.Models;
+using WebApi.Infra.Repositories.Interfaces;
 
 namespace WebApi.Controllers.v1
 {

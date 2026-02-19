@@ -1,5 +1,6 @@
-using WebApi.Domain.DTOs;
+using Microsoft.EntityFrameworkCore;
 using WebApi.Domain.Models;
+using WebApi.Infra.Repositories.Interfaces;
 
 namespace WebApi.Infra.Repositories
 {
@@ -25,19 +26,12 @@ namespace WebApi.Infra.Repositories
             _context.SaveChanges();
         }
 
-        public List<UserDTO> GetAll(int pageNumber, int pageQuantity)
+        public List<User> GetAll(int pageNumber, int pageQuantity)
         {
             return _context.Users
+                .AsNoTracking()
                 .Skip(pageNumber * pageQuantity)
                 .Take(pageQuantity)
-                .Select(b => new UserDTO()
-                {
-                    Id = b.id,
-                    Name = b.name,
-                    DateOfBirth = b.dateOfBirth,
-                    Photo = b.photo,
-                    Email = b.email
-                })
                 .ToList();
         }
 
