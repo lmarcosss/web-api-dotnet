@@ -13,7 +13,7 @@ namespace WebApi.Infra.Repositories
             _context = context;
         }
 
-        public void Add(User user)
+        public async Task Add(User user)
         {
             var userWithHash = new User(
                 user.name,
@@ -22,8 +22,9 @@ namespace WebApi.Infra.Repositories
                 user.email,
                 BCrypt.Net.BCrypt.HashPassword(user.password)
             );
-            _context.Users.Add(userWithHash);
-            _context.SaveChanges();
+
+            await _context.Users.AddAsync(userWithHash);
+            await _context.SaveChangesAsync();
         }
 
         public List<User> GetAll(int pageNumber, int pageQuantity)

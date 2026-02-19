@@ -10,12 +10,16 @@ namespace WebApi.Application.Services
     public class UserService : IUserService
     {
         private readonly IUserRepository _repository;
+        private readonly IFileStorageService _fileStorage;
         private readonly IMapper _mapper;
+        private readonly string _bucketName;
 
-        public UserService(IUserRepository repository, IMapper mapper)
+        public UserService(IUserRepository repository, IFileStorageService fileStorage, IMapper mapper, IConfiguration config)
         {
             _repository = repository;
+            _fileStorage = fileStorage;
             _mapper = mapper;
+            _bucketName = config["Cloud:FileStorageBucketName"] ?? throw new ArgumentNullException("Bucket name not configured");
         }
 
         public List<UserDTO> GetAll(int pageNumber, int pageSize)
@@ -37,45 +41,27 @@ namespace WebApi.Application.Services
             return _mapper.Map<UserDTO>(user);
         }
 
-        public void Add(UserViewModel userView)
+        public async Task<UserDTO> Add(UserViewModel userView)
         {
-            string? filePath = null;
+            string? fileUrl = null;
 
-            if (userView.Photo != null &&
-                !string.IsNullOrEmpty(userView.Photo.FileName))
+            if (userView.Photo != null && !string.IsNullOrEmpty(userView.Photo.FileName))
             {
-                filePath = Path.Combine("Storage", userView.Photo.FileName);
-
-                using Stream fileStream = new FileStream(filePath, FileMode.Create);
-                userView.Photo.CopyTo(fileStream);
+                var fileName = $"profileImage-{userView.Email.ToLower()}-{userView.Name.ToLower()}";
+                fileUrl = await _fileStorage.UploadAsync(_bucketName, fileName, userView.Photo);
             }
 
             var user = new User(
                 userView.Name,
                 userView.DateOfBirth,
-                filePath,
+                fileUrl,
                 userView.Email,
                 userView.Password
             );
 
-            _repository.Add(user);
+            await _repository.Add(user);
+
+            return _mapper.Map<UserDTO>(user);
         }
-
-        public byte[]? DownloadPhoto(int id)
-        {
-            var user = _repository.GetById(id);
-
-            if (user == null)
-                return null;
-
-            if (string.IsNullOrEmpty(user.photo))
-                return null;
-
-            if (!File.Exists(user.photo))
-                return null;
-
-            return File.ReadAllBytes(user.photo);
-        }
-
     }
 }

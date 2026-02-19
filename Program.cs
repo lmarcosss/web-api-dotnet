@@ -12,6 +12,7 @@ using WebApi.Application.Services;
 using WebApi.Application.Services.Interfaces;
 using WebApi.Infra.Repositories.Interfaces;
 using WebApi.Settings;
+using Amazon.S3;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -49,6 +50,15 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+
+builder.Services.AddSingleton<IAmazonS3>(sp => new AmazonS3Client(
+    builder.Configuration["Cloud:AccessKeyId"],
+    builder.Configuration["Cloud:SecretAccessKey"],
+    Amazon.RegionEndpoint.USEast1
+));
+
+builder.Services.AddScoped<IFileStorageService, S3FileStorageService>();
+
 builder.Services.Configure<JwtSettings>(
     builder.Configuration.GetSection("JwtSettings"));
 

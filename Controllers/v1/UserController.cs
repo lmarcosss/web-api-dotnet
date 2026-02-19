@@ -18,11 +18,11 @@ namespace WebApi.Controllers.v1
         }
 
         [HttpPost]
-        public IActionResult Add([FromForm] UserViewModel userView)
+        public async Task<IActionResult> Add([FromForm] UserViewModel userView)
         {
-            _userService.Add(userView);
+            var userDto = await _userService.Add(userView);
 
-            return Ok();
+            return Ok(userDto);
         }
 
         [HttpGet]
@@ -41,16 +41,6 @@ namespace WebApi.Controllers.v1
             if (user == null) return NotFound();
 
             return Ok(user);
-        }
-
-        [HttpPost("{id}/download")]
-        public IActionResult DownloadUserPhotoById(int id)
-        {
-            var photoBytes = _userService.DownloadPhoto(id);
-
-            if (photoBytes == null) return NotFound("User photo not found.");
-
-            return File(photoBytes, "image/jpeg");
         }
     }
 }

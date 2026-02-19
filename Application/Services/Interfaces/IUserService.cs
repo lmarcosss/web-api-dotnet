@@ -5,9 +5,8 @@ namespace WebApi.Application.Services.Interfaces
 {
     public interface IUserService
     {
-        void Add(UserViewModel userView);
+        Task<UserDTO> Add(UserViewModel userView);
         UserDTO? GetById(int id);
         List<UserDTO> GetAll(int pageNumber, int pageSize);
-        byte[]? DownloadPhoto(int id);
     }
 }
