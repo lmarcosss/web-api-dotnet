@@ -1,4 +1,3 @@
-using BCrypt.Net;
 using WebApi.Domain.DTOs;
 using WebApi.Domain.Models;
 
@@ -20,7 +19,7 @@ namespace WebApi.Infra.Repositories
                 user.dateOfBirth,
                 user.photo,
                 user.email,
-                BCrypt.HashPassword(user.password)
+                BCrypt.Net.BCrypt.HashPassword(user.password)
             );
             _context.Users.Add(userWithHash);
             _context.SaveChanges();

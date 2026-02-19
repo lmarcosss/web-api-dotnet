@@ -3,24 +3,32 @@ using Microsoft.AspNetCore.Mvc;
 using WebApi.Application.Services;
 using WebApi.Domain.Models;
 
-namespace WebApi.Controllers
+namespace WebApi.Controllers.v1
 {
     [ApiController]
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/[controller]")]
     public class AuthController : ControllerBase
     {
-        [HttpPost]
-        public IActionResult Auth(string username, string password)
+        private readonly IUserRepository _userRepository;
+
+        public AuthController(IUserRepository userRepository)
         {
-            if (username == "leonardo" && password == "123456")
-            {
-                var token = TokenService.GenerateToken(new Employee());
+            _userRepository = userRepository;
+        }
 
-                return Ok(token);
-            }
+        [HttpPost]
+        public IActionResult Auth([FromQuery] string email, [FromQuery] string password)
+        {
+            var user = _userRepository.GetByEmail(email);
+            if (user == null)
+                return BadRequest("Email or password invalid");
 
-            return BadRequest("Username or password invalid");
+            if (!BCrypt.Net.BCrypt.Verify(password, user.password))
+                return BadRequest("Email or password invalid");
+
+            var token = TokenService.GenerateToken(user);
+            return Ok(token);
         }
     }
 }

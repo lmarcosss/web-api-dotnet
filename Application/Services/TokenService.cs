@@ -8,14 +8,14 @@ namespace WebApi.Application.Services
 {
     public class TokenService
     {
-        public static object GenerateToken(Employee employee)
+        public static object GenerateToken(User user)
         {
             var key = Encoding.ASCII.GetBytes(Key.Secret);
             var tokenConfig = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new Claim[]
                 {
-                    new Claim("employeeId", employee.id.ToString()),
+                    new Claim("userId", user.id.ToString()),
                 }),
                 Expires = DateTime.UtcNow.AddHours(3),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
