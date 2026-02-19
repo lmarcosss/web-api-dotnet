@@ -8,8 +8,10 @@ namespace WebApi.Application.Mapping
     {
         public DomainToDTOMapping()
         {
-            CreateMap<Employee, EmployeeDTO>()
-                .ForMember(destiny => destiny.NameEmployee, m => m.MapFrom(origin => origin.name));
+            CreateMap<User, UserDTO>()
+                .ForMember(dest => dest.Name, m => m.MapFrom(origin => origin.name))
+                .ForMember(dest => dest.DateOfBirth, m => m.MapFrom(origin => origin.dateOfBirth))
+                .ForMember(dest => dest.Email, m => m.MapFrom(origin => origin.email));
         }
     }
 }

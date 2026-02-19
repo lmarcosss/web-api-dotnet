@@ -44,7 +44,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-builder.Services.AddTransient<IEmployeeRepository, EmployeeRepository>();
+builder.Services.AddTransient<IUserRepository, UserRepository>();
 
 var key = Encoding.ASCII.GetBytes(Key.Secret);
 
