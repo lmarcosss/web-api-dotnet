@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using WebApi;
 using Microsoft.OpenApi;
 using WebApi.Infra.Repositories;
 using WebApi.Application.Mapping;
@@ -12,6 +11,7 @@ using Asp.Versioning.ApiExplorer;
 using WebApi.Application.Services;
 using WebApi.Application.Services.Interfaces;
 using WebApi.Infra.Repositories.Interfaces;
+using WebApi.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,10 +46,11 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-builder.Services.AddTransient<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
-
-var key = Encoding.ASCII.GetBytes(Key.Secret);
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.Configure<JwtSettings>(
+    builder.Configuration.GetSection("JwtSettings"));
 
 builder.Services.AddAuthentication(x =>
 {
@@ -57,6 +58,9 @@ builder.Services.AddAuthentication(x =>
     x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(x =>
 {
+    var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
+    var key = Encoding.ASCII.GetBytes(jwtSettings!.ApiSecret);
+
     x.RequireHttpsMetadata = false;
     x.SaveToken = true;
     x.TokenValidationParameters = new TokenValidationParameters

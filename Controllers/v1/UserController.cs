@@ -1,10 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using WebApi.Domain.Models;
 using WebApi.Application.ViewModel;
-using AutoMapper;
-using WebApi.Domain.DTOs;
 using Asp.Versioning;
-using WebApi.Application.Services;
 using WebApi.Application.Services.Interfaces;
 
 namespace WebApi.Controllers.v1

@@ -20,10 +20,10 @@ public sealed class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOption
                 description.GroupName,
                 new OpenApiInfo
                 {
-                    Title = "Minha API",
+                    Title = "My API",
                     Version = description.ApiVersion.ToString(),
                     Description = description.IsDeprecated
-                        ? "⚠️ Esta versão está depreciada."
+                        ? "⚠️ This version was deprecated."
                         : null
                 });
         }

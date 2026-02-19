@@ -1,16 +1,26 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using WebApi.Application.Services.Interfaces;
 using WebApi.Domain.Models;
+using WebApi.Settings;
 
 namespace WebApi.Application.Services
 {
-    public class TokenService
+    public class TokenService : ITokenService
     {
-        public static object GenerateToken(User user)
+        private readonly string _secret;
+
+        public TokenService(IOptions<JwtSettings> options)
         {
-            var key = Encoding.ASCII.GetBytes(Key.Secret);
+            _secret = options.Value.ApiSecret;
+        }
+
+        public object GenerateToken(User user)
+        {
+            var key = Encoding.ASCII.GetBytes(_secret);
             var tokenConfig = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new Claim[]

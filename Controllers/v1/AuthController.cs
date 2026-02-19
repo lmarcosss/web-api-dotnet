@@ -1,6 +1,6 @@
 using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
-using WebApi.Application.Services;
+using WebApi.Application.Services.Interfaces;
 using WebApi.Infra.Repositories.Interfaces;
 
 namespace WebApi.Controllers.v1
@@ -11,10 +11,12 @@ namespace WebApi.Controllers.v1
     public class AuthController : ControllerBase
     {
         private readonly IUserRepository _userRepository;
+        private readonly ITokenService _tokenService;
 
-        public AuthController(IUserRepository userRepository)
+        public AuthController(IUserRepository userRepository, ITokenService tokenService)
         {
             _userRepository = userRepository;
+            _tokenService = tokenService;
         }
 
         [HttpPost]
@@ -27,7 +29,7 @@ namespace WebApi.Controllers.v1
             if (!BCrypt.Net.BCrypt.Verify(password, user.password))
                 return BadRequest("Email or password invalid");
 
-            var token = TokenService.GenerateToken(user);
+            var token = _tokenService.GenerateToken(user);
             return Ok(token);
         }
     }
