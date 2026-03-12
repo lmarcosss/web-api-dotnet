@@ -56,7 +56,7 @@ namespace WebApi.Application.Services
                 userView.DateOfBirth,
                 fileUrl,
                 userView.Email,
-                userView.Password
+                BCrypt.Net.BCrypt.HashPassword(userView.Password)
             );
 
             await _repository.Add(user);

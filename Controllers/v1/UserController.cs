@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using WebApi.Application.ViewModel;
 using Asp.Versioning;
 using WebApi.Application.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebApi.Controllers.v1
 {
@@ -33,12 +34,21 @@ namespace WebApi.Controllers.v1
             return Ok(users);
         }
 
-        [HttpGet("{id}")]
-        public IActionResult GetById(int id)
+        [HttpGet("me")]
+        [Authorize]
+        public IActionResult Me()
         {
-            var user = _userService.GetById(id);
+            var userIdClaim = User.FindFirst("userId");
 
-            if (user == null) return NotFound();
+            if (userIdClaim == null)
+                return Unauthorized();
+
+            var userId = int.Parse(userIdClaim.Value);
+
+            var user = _userService.GetById(userId);
+
+            if (user == null)
+                return NotFound();
 
             return Ok(user);
         }

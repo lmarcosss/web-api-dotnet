@@ -5,6 +5,6 @@ namespace WebApi.Application.Services.Interfaces
 {
     public interface ITokenService
     {
-        object GenerateToken(User user);
+        string GenerateToken(User user);
     }
 }

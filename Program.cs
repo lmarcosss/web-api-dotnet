@@ -50,6 +50,7 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddSingleton<IAmazonS3>(sp => new AmazonS3Client(
     builder.Configuration["Cloud:AccessKeyId"],

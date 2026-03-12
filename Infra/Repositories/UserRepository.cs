@@ -15,15 +15,7 @@ namespace WebApi.Infra.Repositories
 
         public async Task Add(User user)
         {
-            var userWithHash = new User(
-                user.name,
-                user.dateOfBirth,
-                user.photo,
-                user.email,
-                BCrypt.Net.BCrypt.HashPassword(user.password)
-            );
-
-            await _context.Users.AddAsync(userWithHash);
+            await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
         }
 

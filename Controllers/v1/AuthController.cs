@@ -1,7 +1,7 @@
 using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
+using WebApi.Application.DTOs;
 using WebApi.Application.Services.Interfaces;
-using WebApi.Infra.Repositories.Interfaces;
 
 namespace WebApi.Controllers.v1
 {
@@ -10,27 +10,25 @@ namespace WebApi.Controllers.v1
     [Route("api/v{version:apiVersion}/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly IUserRepository _userRepository;
-        private readonly ITokenService _tokenService;
+        private readonly IAuthService _authService;
 
-        public AuthController(IUserRepository userRepository, ITokenService tokenService)
+        public AuthController(IAuthService authService)
         {
-            _userRepository = userRepository;
-            _tokenService = tokenService;
+            _authService = authService;
         }
 
         [HttpPost]
         public IActionResult Auth([FromQuery] string email, [FromQuery] string password)
         {
-            var user = _userRepository.GetByEmail(email);
-            if (user == null)
-                return BadRequest("Email or password invalid");
+            var token = _authService.Login(email, password);
 
-            if (!BCrypt.Net.BCrypt.Verify(password, user.password))
-                return BadRequest("Email or password invalid");
+            if (token == null) {
+                return Unauthorized("Email or password invalid");
+            }
 
-            var token = _tokenService.GenerateToken(user);
-            return Ok(token);
+            var response = new LoginResponseDTO(token);
+            
+            return Ok(response);
         }
     }
 }

@@ -18,7 +18,7 @@ namespace WebApi.Application.Services
             _secret = options.Value.ApiSecret;
         }
 
-        public object GenerateToken(User user)
+        public string GenerateToken(User user)
         {
             var key = Encoding.ASCII.GetBytes(_secret);
             var tokenConfig = new SecurityTokenDescriptor
@@ -33,12 +33,8 @@ namespace WebApi.Application.Services
 
             var tokenHandler = new JwtSecurityTokenHandler();
             var token = tokenHandler.CreateToken(tokenConfig);
-            var tokenString = tokenHandler.WriteToken(token);
 
-            return new
-            {
-                token = tokenString
-            };
+            return tokenHandler.WriteToken(token);
         }
     }
 }
