@@ -15,6 +15,7 @@ Este é um projeto de estudo focado em aprender e praticar os principais conceit
 ### Objetivo Educacional
 
 O objetivo principal é consolidar conhecimentos em:
+
 - Desenvolvimento de APIs RESTful modernas
 - Autenticação e autorização
 - Persistência de dados com Entity Framework Core
@@ -26,11 +27,11 @@ O objetivo principal é consolidar conhecimentos em:
 
 - **.NET 10.0** - Framework principal
 - **ASP.NET Core Web API** - Framework para criação da API
-- **Entity Framework Core 10.0.3** - ORM para acesso a dados
+- **Entity Framework Core 10.0.0** - ORM para acesso a dados
 - **PostgreSQL 16** - Banco de dados relacional (containerizado)
 - **Npgsql.EntityFrameworkCore.PostgreSQL 10.0.0** - Provider do PostgreSQL para EF Core
 - **JWT Authentication** - Autenticação baseada em tokens
-  - `Microsoft.AspNetCore.Authentication.JwtBearer 10.0.3`
+  - `Microsoft.AspNetCore.Authentication.JwtBearer 10.0.0`
   - `System.IdentityModel.Tokens.Jwt 8.16.0`
 - **AutoMapper 12.0.1** - Mapeamento objeto-objeto (DTOs)
 - **Swagger/OpenAPI** - Documentação interativa da API
@@ -116,6 +117,7 @@ docker-compose up -d
 ```
 
 Isso criará um container com as seguintes configurações:
+
 - **Container**: postgres-db
 - **Porta**: 5432
 - **Database**: app_db
@@ -143,6 +145,7 @@ dotnet run
 ```
 
 A API estará disponível em:
+
 - **HTTPS**: `https://localhost:7198`
 - **HTTP**: `http://localhost:5116`
 
@@ -156,13 +159,13 @@ O Swagger permite testar todos os endpoints diretamente pelo navegador, incluind
 
 ### Endpoints Principais
 
-| Método | Endpoint | Descrição | Autenticação |
-|--------|----------|-----------|--------------|
-| GET | `/` | Health check | Não |
-| POST | `/api/v1/auth` | Autenticação (obter token JWT com email e senha) | Não |
-| POST | `/api/v1/user` | Criar novo usuário | Sim |
-| GET | `/api/v1/user` | Listar usuários (com paginação) | Sim |
-| GET | `/api/v1/user/{id}` | Buscar usuário por ID | Sim |
+| Método | Endpoint            | Descrição                                        | Autenticação |
+| ------ | ------------------- | ------------------------------------------------ | ------------ |
+| GET    | `/`                 | Health check                                     | Não          |
+| POST   | `/api/v1/auth`      | Autenticação (obter token JWT com email e senha) | Não          |
+| POST   | `/api/v1/user`      | Criar novo usuário                               | Sim          |
+| GET    | `/api/v1/user`      | Listar usuários (com paginação)                  | Sim          |
+| GET    | `/api/v1/user/{id}` | Buscar usuário por ID                            | Sim          |
 
 > **Nota**: A API utiliza apenas a versão **v1** (`/api/v1/...`).
 
@@ -185,6 +188,7 @@ curl -X POST "https://localhost:7198/api/v1/auth?email=seu@email.com&password=su
 ```
 
 **Resposta:**
+
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
@@ -313,39 +317,46 @@ Este projeto aborda os seguintes conceitos importantes:
 Sugestões para expandir este projeto de estudo:
 
 ### Segurança
+
 - [ ] Implementar autorização baseada em roles/claims
 - [ ] Adicionar refresh tokens
 - [ ] Implementar rate limiting
 - [ ] Configurar CORS adequadamente
 
 ### Testes
+
 - [ ] Testes unitários (xUnit)
 - [ ] Testes de integração
 - [ ] Testes de carga (JMeter/K6)
 
 ### Arquitetura
+
 - [ ] Implementar CQRS pattern
 - [ ] Adicionar MediatR para mediação de comandos
 - [ ] Implementar eventos de domínio
 
 ### Validação e Qualidade
+
 - [ ] Adicionar FluentValidation
 - [ ] Implementar logging estruturado (Serilog)
 - [ ] Adicionar Health Checks mais robustos
 - [ ] Implementar auditoria de entidades
 
 ### Performance
+
 - [ ] Adicionar cache distribuído (Redis)
 - [ ] Implementar cache de resposta HTTP
 - [ ] Otimizar queries com projections
 
 ### DevOps
+
 - [ ] Containerizar a aplicação completa
 - [ ] CI/CD pipeline (GitHub Actions, Azure DevOps)
 - [ ] Configurar ambiente de staging
 - [ ] Implementar feature flags
 
 ### Funcionalidades
+
 - [ ] Implementar soft delete
 - [ ] Adicionar filtros e ordenação
 - [ ] Implementar busca avançada
@@ -420,29 +431,35 @@ docker exec -it postgres-db psql -U postgres -d app_db
 ## Observações Técnicas
 
 ### API Versioning
+
 - Apenas a versão **v1** está em uso
 - O versionamento é feito via URL: `/api/v1/...`
 
 ### Swagger
+
 - Configurado com suporte a autenticação Bearer token
 - Documentação separada por versão da API
 - Disponível apenas em ambiente de desenvolvimento
 
 ### Storage de Arquivos (AWS S3)
+
 - Fotos enviadas no cadastro são enviadas ao bucket configurado em `Cloud:FileStorageBucketName`
 - O nome do arquivo segue o padrão do código (ex.: `profileImage-{email}-{name}`)
 - A URL retornada é construída pelo `S3FileStorageService` no formato `https://{bucket}.s3.{region}.amazonaws.com/{key}` e armazenada no campo `photo` do usuário
 - O cliente pode exibir ou baixar a imagem diretamente pela URL retornada
 
 ### CORS
+
 - CORS não está configurado atualmente
 - Adicione configuração de CORS se precisar consumir a API de um frontend
 
 ### HTTPS
+
 - Redirecionamento HTTPS configurado no pipeline
 - Certificado de desenvolvimento é gerado automaticamente pelo .NET
 
 ### Exception Handling
+
 - Middleware global de tratamento de erros configurado
 - Endpoint `/error` para captura de exceções
 
